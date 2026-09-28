@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Pollution & Disease Exploratory Analysis - MP Dashboard</title>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #e2e8f0;
+            color: #1e293b;
+            padding: 10px;
+        }
+        
+        /* Power BI Main Header */
+        .header {
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Power BI Grid Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1fr 220px;
+            gap: 10px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* KPI Top Cards Row */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .kpi-card {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 8px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .kpi-title {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #475569;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.1;
+            margin-bottom: 4px;
+        }
+
+        .kpi-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0284c7;
+        }
+
+        /* Chart Grids */
+        .charts-row-1 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .charts-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .chart-card {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .chart-header {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 4px;
+            height: 26px;
+            line-height: 1.1;
+        }
+
+        .chart-box {
+            position: relative;
+            height: 140px;
+            width: 100%;
+        }
+
+        /* Right Filter Panel */
+        .filter-panel {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .filter-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0f172a;
+            border-bottom: 2px solid #0284c7;
+            padding-bottom: 4px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-group label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            background-color: #f8fafc;
+            color: #0f172a;
+            outline: none;
+        }
+
+        .filter-group select:focus {
+            border-color: #0284c7;
+        }
+
+        .apply-btn {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .apply-btn:hover {
+            background: #0369a1;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .charts-row-1, .charts-row-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        Water Pollution & Disease Exploratory Analysis - Madhya Pradesh Dashboard
+    </div>
+
+    <div class="dashboard-container">
+        
+        <!-- Left & Center Analytics Area -->
+        <div class="main-content">
+            
+            <!-- Top KPI Cards -->
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-title">Avg % Population Access Clean Water</div>
+                    <div class="kpi-value" id="kpiCleanWater">64.61%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Average Bacteria Count (CFU/mL)</div>
+                    <div class="kpi-value" id="kpiBacteria">2.49K</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Avg Contaminant Level (ppm)</div>
+                    <div class="kpi-value" id="kpiContaminant">4.95</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Average Dissolved Oxygen (mg/L)</div>
+                    <div class="kpi-value" id="kpiDO">6.49</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Avg Lead Concentration (µg/L)</div>
+                    <div class="kpi-value" id="kpiLead">10.05</div>
+                </div>
+            </div>
+
+            <!-- Middle Charts Row 1 -->
+            <div class="charts-row-1">
+                <div class="chart-card">
+                    <div class="chart-header">Typhoid Cases per 100k by Rainfall (mm)</div>
+                    <div class="chart-box">
+                        <canvas id="donutChart1"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">Typhoid Cases by Water Source Type</div>
+                    <div class="chart-box">
+                        <canvas id="pieChart1"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">Water Risk Share by MP Regions</div>
+                    <div class="chart-box">
+                        <canvas id="barChart1"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Charts Row 2 -->
+            <div class="charts-row-2">
+                <div class="chart-card">
+                    <div class="chart-header">Typhoid Cases (2018-2026 Trend)</div>
+                    <div class="chart-box">
+                        <canvas id="lineChart1"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">Cases by Per Capita Expenditure</div>
+                    <div class="chart-box">
+                        <canvas id="colChart1"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">Cases by Healthcare Access Index</div>
+                    <div class="chart-box">
+                        <canvas id="colChart2"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">Urbanization Rate vs Treatment</div>
+                    <div class="chart-box">
+                        <canvas id="multiBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Side Power BI Style Filters -->
+        <div class="filter-panel">
+            <div class="filter-title">Filters Panel</div>
+
+            <div class="filter-group">
+                <label for="stateFilter">State / Region</label>
+                <select id="stateFilter">
+                    <option value="All">All Regions (MP)</option>
+                    <option value="Bhopal">Bhopal (Upper Lake)</option>
+                    <option value="Jabalpur">Jabalpur (Narmada)</option>
+                    <option value="Indore">Indore (Khan River)</option>
+                    <option value="Narmadapuram">Narmadapuram (Tawa)</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="districtFilter">District Risk Zone</label>
+                <select id="districtFilter">
+                    <option value="All">All Zones</option>
+                    <option value="High">High Contamination</option>
+                    <option value="Moderate">Moderate Risk</option>
+                    <option value="Safe">Safe Water Zone</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="yearFilter">Analysis Year</label>
+                <select id="yearFilter">
+                    <option value="All">2020 - 2026</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="sourceFilter">Water Source Type</label>
+                <select id="sourceFilter">
+                    <option value="All">All Sources</option>
+                    <option value="River">River</option>
+                    <option value="Lake">Lake / Reservoir</option>
+                    <option value="Well">Groundwater / Well</option>
+                    <option value="Pond">Pond</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="treatmentFilter">Water Treatment Method</label>
+                <select id="treatmentFilter">
+                    <option value="All">All Methods</option>
+                    <option value="Boiling">Boiling</option>
+                    <option value="Chlorination">Chlorination</option>
+                    <option value="Filtration">RO / Filtration</option>
+                </select>
+            </div>
+
+            <button class="apply-btn" onclick="filterDashboard()">Apply Slice Filters</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Chart Defaults
+        Chart.defaults.font.size = 9;
+        Chart.defaults.font.family = "'Segoe UI', sans-serif";
+
+        // Donut Chart 1
+        const donutCtx = document.getElementById('donutChart1').getContext('2d');
+        let donutChart = new Chart(donutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['< 500mm', '500-1000mm', '1000-1500mm', '> 1500mm'],
+                datasets: [{
+                    data: [15, 25, 45, 15],
+                    backgroundColor: ['#0284c7', '#f97316', '#a855f7', '#06b6d4']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+
+        // Pie Chart 1
+        const pieCtx = document.getElementById('pieChart1').getContext('2d');
+        let pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['River', 'Lake', 'Well', 'Spring', 'Pond'],
+                datasets: [{
+                    data: [35, 25, 20, 10, 10],
+                    backgroundColor: ['#38bdf8', '#818cf8', '#c084fc', '#f472b6', '#fb7185']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+
+        // Bar Chart 1 (Tree-map lookalike)
+        const bar1Ctx = document.getElementById('barChart1').getContext('2d');
+        let bar1Chart = new Chart(bar1Ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Bhopal', 'Indore', 'Jabalpur', 'Gwalior', 'Ujjain'],
+                datasets: [{
+                    data: [180, 150, 120, 90, 70],
+                    backgroundColor: ['#ef4444', '#f97316', '#eab308', '#06b6d4', '#3b82f6']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // Line Chart 1
+        const lineCtx = document.getElementById('lineChart1').getContext('2d');
+        let lineChart = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: ['2020', '2021', '2022', '2023', '2024', '2025', '2026'],
+                datasets: [{
+                    label: 'Cases',
+                    data: [4.2, 3.8, 5.1, 4.5, 6.0, 5.2, 4.8],
+                    borderColor: '#0284c7',
+                    backgroundColor: 'rgba(2, 132, 199, 0.15)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // Column Chart 1
+        const col1Ctx = document.getElementById('colChart1').getContext('2d');
+        let col1Chart = new Chart(col1Ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'],
+                datasets: [{ data: [7.2, 6.8, 8.1, 7.5, 6.9], backgroundColor: '#0284c7' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // Column Chart 2
+        const col2Ctx = document.getElementById('colChart2').getContext('2d');
+        let col2Chart = new Chart(col2Ctx, {
+            type: 'bar',
+            data: {
+                labels: ['10', '20', '30', '40', '50', '60', '70'],
+                datasets: [{ data: [8.5, 9.2, 8.0, 8.8, 9.0, 8.4, 9.5], backgroundColor: '#0369a1' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // Multi-Bar Chart
+        const multiCtx = document.getElementById('multiBarChart').getContext('2d');
+        let multiChart = new Chart(multiCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Low', 'Mid', 'High'],
+                datasets: [
+                    { label: 'Boiling', data: [12, 19, 14], backgroundColor: '#38bdf8' },
+                    { label: 'Chlorine', data: [8, 12, 18], backgroundColor: '#a855f7' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // Filter Action
+        function filterDashboard() {
+            const state = document.getElementById('stateFilter').value;
+            
+            if(state === 'Bhopal') {
+                document.getElementById('kpiCleanWater').innerText = "72.40%";
+                document.getElementById('kpiBacteria').innerText = "1.85K";
+                document.getElementById('kpiContaminant').innerText = "3.20";
+            } else if(state === 'Indore') {
+                document.getElementById('kpiCleanWater').innerText = "58.10%";
+                document.getElementById('kpiBacteria').innerText = "3.10K";
+                document.getElementById('kpiContaminant').innerText = "6.40";
+            } else {
+                document.getElementById('kpiCleanWater').innerText = "64.61%";
+                document.getElementById('kpiBacteria').innerText = "2.49K";
+                document.getElementById('kpiContaminant').innerText = "4.95";
+            }
+
+            // Randomize charts slightly to show live filter response
+            donutChart.data.datasets[0].data = [Math.floor(Math.random()*30)+10, Math.floor(Math.random()*30)+10, 40, 15];
+            donutChart.update();
+            
+            lineChart.data.datasets[0].data = Array.from({length: 7}, () => (Math.random() * 4 + 3).toFixed(1));
+            lineChart.update();
+        }
+    </script>
+</body>
+</html>
